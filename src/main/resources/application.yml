@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: spring-batch-demo-simple
+  jmx:
+    default-domain: spring-batch-demo-simple
+  profiles:
+    active: lh
+  autoconfigure:
+    exclude:
+    - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
