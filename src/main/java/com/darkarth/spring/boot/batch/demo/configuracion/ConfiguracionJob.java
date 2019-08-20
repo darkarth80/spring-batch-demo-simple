@@ -23,31 +23,6 @@ import org.springframework.core.io.FileSystemResource;
 public class ConfiguracionJob {
 
     @Bean
-    public Step demoSimpleStep(StepBuilderFactory stepBuilders) {
-
-        StepBuilder sb = stepBuilders.get("demoSimpleStep");
-
-        //Separo los pasos en distintas variables para efectos de mejor lectura.
-        //Al final puede ponerse en una sola línea.
-
-        FaultTolerantStepBuilder<Fila, String> ssbChunk = sb.<Fila, String>chunk(10).faultTolerant();
-
-        FaultTolerantStepBuilder<Fila, String> ssbLector = ssbChunk.reader(lector()).faultTolerant();
-
-        FaultTolerantStepBuilder<Fila, String> ssbProcesador = ssbLector.processor(procesador()).faultTolerant();
-        
-        FaultTolerantStepBuilder<Fila, String> ssbEscritor = ssbProcesador.writer(escritor()).faultTolerant();
-
-        return ssbEscritor.build();
-    }
-
-    @Bean
-    public Job demoSimpleJob(JobBuilderFactory jobBuilders, StepBuilderFactory stepBuilders) {
-        Step sds = demoSimpleStep(stepBuilders);
-        return jobBuilders.get("demoSimpleJob").start(sds).build();
-    }
-
-    @Bean
     public FlatFileItemReader<Fila> lector() {
         return new FlatFileItemReaderBuilder<Fila>()
         .name("filaItemReader")
@@ -67,6 +42,28 @@ public class ConfiguracionJob {
         .name("resultadoItemWriter")
         .resource(new FileSystemResource("target/output/resultado.log"))
         .lineAggregator(new PassThroughLineAggregator<>()).build();
+    }
+
+    @Bean
+    public Step demoSimpleStep(StepBuilderFactory stepBuilders) {
+
+        StepBuilder sb = stepBuilders.get("demoSimpleStep");
+
+        //Separo los pasos en distintas variables para efectos de mejor lectura.
+        //Al final puede ponerse en una sola línea.
+
+        FaultTolerantStepBuilder<Fila, String> ssbChunk = sb.<Fila, String>chunk(10).faultTolerant();
+        FaultTolerantStepBuilder<Fila, String> ssbLector = ssbChunk.reader(lector()).faultTolerant();
+        FaultTolerantStepBuilder<Fila, String> ssbProcesador = ssbLector.processor(procesador()).faultTolerant();
+        FaultTolerantStepBuilder<Fila, String> ssbEscritor = ssbProcesador.writer(escritor()).faultTolerant();
+
+        return ssbEscritor.build();
+    }
+
+    @Bean
+    public Job demoSimpleJob(JobBuilderFactory jobBuilders, StepBuilderFactory stepBuilders) {
+        Step sds = demoSimpleStep(stepBuilders);
+        return jobBuilders.get("demoSimpleJob").start(sds).build();
     }
 
 }
